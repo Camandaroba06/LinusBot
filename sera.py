@@ -1,3 +1,4 @@
+from socket import timeout
 import tkinter as tk
 import serial
 import threading
@@ -7,18 +8,19 @@ pastaApp = os.path.dirname(__file__)
 
 class Cronus(tk.Frame):
     # Aqui fica o construtor da minha classe(onde vou iniciar os trem tudo)---------------------------------------------------------------------------------------------------
-    def _init_(self, master=None):
-        super()._init_(master, bg="Black")
+    def __init__(self, master=None):
+        super().__init__(master, bg="Black")
         self.master = master
         self.hilo1 = threading.Thread(target=self.getSensorValues, daemon=True)
         self.arduino = serial.Serial("COM3", 9600, timeout=1.0)
-        self.LDRvalue = 1
+        self.LDRvalue = tk.IntVar()
         self.running = False
         self.update_time = ''
         self.valorAnterior = 6  # o importante é ser diferente de 0 e 1
         self.millis = 0
         self.seconds = 0
         self.minutes = 0
+        self.espera = 0
         self.create_widgets()
         self.hilo1.start()
         # self.update()
@@ -39,13 +41,15 @@ class Cronus(tk.Frame):
             # print(self.LDRvalue)
             # if(self.valorAnterior == self.LDRvalue):
             #     continue
-            if((self.valorAnterior == 1 and self.LDRvalue == 0) and self.seconds > 5):
-                self.pause()
-
-            elif (self.valorAnterior == 1 and self.LDRvalue == 0 and self.running == False and self.seconds == 0):
-                self.inicio()
-                print("Começouuu!!!")
+            if((self.LDRvalue != self.valorAnterior) and self.espera > 2):
+                if(self.seconds == 0 and self.minutes == 0):
+                    self.inicio()
+                else:
+                    self.label_TIME.after_cancel(self.update_time)
+                    self.running = False
+                    print("Pausou!!!!")
             self.valorAnterior = self.LDRvalue
+            self.espera += 1
 
     # Esse método(ou função) cria meus Labels, textos e frames ---------------------------------------------------------------------------------------------------------------
 
@@ -82,13 +86,13 @@ class Cronus(tk.Frame):
         if self.running:
             self.label_TIME.after_cancel(self.update_time)
             self.running = False
-            self.minutes, self.seconds, self.millis = 0, 0, 0
-            self.label_TIME.config(text='00:00:00')
+        self.minutes, self.seconds, self.millis = 0, 0, 0
+        self.label_TIME.config(text='00:00:00')
 
     # Aqui é a função que irá atualizar meus números no GUI
     def update(self):
-        # if self.running:
-        self.millis += 4
+        if self.running:
+            self.millis += 4
         # tive que colocar 4, pq ele n consegue fazer tão proximo de um relógio normal, então fui testando até se aproximar fds
         # provavelmente por causa do tempo de execução de todo o código, aumentando consideravelmente o erro
         if self.millis == 1000:
