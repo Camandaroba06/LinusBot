@@ -3,7 +3,6 @@ import tkinter as tk
 import serial
 import threading
 import os
-import time
 pastaApp = os.path.dirname(__file__)
 
 
@@ -14,7 +13,7 @@ class Cronus(tk.Frame):
         self.master = master
         self.hilo1 = threading.Thread(target=self.getSensorValues, daemon=True)
         self.arduino = serial.Serial("COM3", 9600, timeout=1.0)
-        self.LDRvalue = 1
+        self.LDRvalue = tk.IntVar()
         self.running = False
         self.update_time = ''
         self.valorAnterior = 6  # o importante é ser diferente de 0 e 1
@@ -34,8 +33,8 @@ class Cronus(tk.Frame):
             self.LDRvalue = self.arduino.readline()[:-2].decode()
             # esse text para concatenar tem q ser quando ainda era string, ou seja, antes dos aux, for e etc
             self.label_ldr.config(text='Valor do LDR:' + self.LDRvalue)
-            print("Valor Novo:" + " " + self.LDRvalue + " " "Valor Antigo:" + " " + str(self.valorAnterior) + " " + "Seconds: " + str(
-                self.seconds) + " " + "Running: " + str(self.running)+" " + "Espera: " + str(self.espera))
+            print("Valor Novo:" + " " + self.LDRvalue
+                  + " " "Valor Antigo:" + " " + str(self.valorAnterior) + " " + "Seconds: " + str(self.seconds) + " " + "Running: " + str(self.running) + " " + "Espera: " + str(self.espera))
             aux = self.LDRvalue.split()
             for i in aux:
                 self.LDRvalue = int(i)
@@ -46,9 +45,10 @@ class Cronus(tk.Frame):
                 if(self.seconds == 0 and self.minutes == 0):
                     self.inicio()
                 else:
-                    self.label_TIME.after_cancel(self.update_time)
-                    self.running = False
-                    print("Pausou!!!!")
+                    if(self.espera > 500):
+                        self.label_TIME.after_cancel(self.update_time)
+                        self.running = False
+                        print("Pausou!!!!")
             self.valorAnterior = self.LDRvalue
             self.espera += 1
 
@@ -73,10 +73,12 @@ class Cronus(tk.Frame):
         self.pause_button.place(x=10, y=10)
 
     def inicio(self):
-        self.update()
-        self.running = True
+        if not self.running:
+            self.update()
+            self.running = True
 
     def pause(self):
+        # Tirei o if running:
         self.label_TIME.after_cancel(self.update_time)
         self.running = False
         print("Pausou!!!!")
@@ -85,8 +87,8 @@ class Cronus(tk.Frame):
         if self.running:
             self.label_TIME.after_cancel(self.update_time)
             self.running = False
-            self.minutes, self.seconds, self.millis = 0, 0, 0
-            self.label_TIME.config(text='00:00:00')
+        self.minutes, self.seconds, self.millis = 0, 0, 0
+        self.label_TIME.config(text='00:00:00')
 
     # Aqui é a função que irá atualizar meus números no GUI
     def update(self):
