@@ -1,6 +1,4 @@
-from socket import timeout
 import tkinter as tk
-import click
 import serial
 import threading
 import os
@@ -22,8 +20,7 @@ class Cronus(tk.Frame):
         self.seconds = 0
         self.minutes = 0
         self.espera = 0
-        self.conta_voltas = 0
-        self.controle_func_voltas = 0  # numero de vezes que rodei a função voltas
+        self.conta_voltas = 1
         self.create_widgets()
         self.hilo1.start()
         # self.update()
@@ -42,8 +39,6 @@ class Cronus(tk.Frame):
             for i in aux:
                 self.LDRvalue = int(i)
             # print(self.LDRvalue)
-            # if(self.valorAnterior == self.LDRvalue):
-            #     continue
             if((self.LDRvalue != self.valorAnterior) and self.espera > 2):
                 if(self.seconds == 0 and self.minutes == 0):
                     self.inicio()
@@ -51,7 +46,6 @@ class Cronus(tk.Frame):
                     if(self.espera > 200):
                         self.voltas()
                         self.espera = 0
-                        # self.reset()
             self.valorAnterior = self.LDRvalue
             self.espera += 1
 
@@ -103,20 +97,20 @@ class Cronus(tk.Frame):
 
         print("Valor click_lectura: " + str(self.conta_voltas))
         if self.conta_voltas == 1:
-            self.tempo_volta1.config(text='{} → {}:{}:{}'.format(self.conta_voltas, self.minutes, self.seconds, self.millis),
-                                     fg='white', bg='gray10')
+            self.tempo_volta1.config(text=' {}:{}:{}'.format(self.minutes, self.seconds, self.millis),
+                                     fg='white', bg='#80c4e4')
 
         elif self.conta_voltas == 2:
-            self.tempo_volta2.config(text='{} → {}:{}:{}'.format(self.conta_voltas, self.minutes, self.seconds, self.millis),
-                                     fg='white', bg='gray10')
+            self.tempo_volta2.config(text=' {}:{}:{}'.format(self.minutes, self.seconds, self.millis),
+                                     fg='white', bg='#80c4e4')
 
         elif self.conta_voltas == 3:
-            self.tempo_volta3.config(text='{} → {}:{}:{}'.format(self.conta_voltas, self.minutes, self.seconds, self.millis),
-                                     fg='white', bg='gray10')
+            self.tempo_volta3.config(text=' {}:{}:{}'.format(self.minutes, self.seconds, self.millis),
+                                     fg='white', bg='#80c4e4')
 
         elif self.conta_voltas == 4:
-            self.tempo_volta4.config(text='{} → {}:{}:{}'.format(self.conta_voltas, self.minutes, self.seconds, self.millis),
-                                     fg='white', bg='gray10')
+            self.tempo_volta4.config(text=' {}:{}:{}'.format(self.minutes, self.seconds, self.millis),
+                                     fg='white', bg='#80c4e4')
         self.conta_voltas += 1
         self.minutes, self.seconds, self.millis = 0, 0, 0
         self.label_TIME.config(text='00:00:00')
@@ -133,10 +127,6 @@ class Cronus(tk.Frame):
         self.running = False
 
         print("Pausou!!!!")
-
-    # def reset(self):
-    #     self.minutes, self.seconds, self.millis = 0, 0, 0
-    #     self.label_TIME.config(text='00:00:00')
 
     # Aqui é a função que irá atualizar meus números no GUI
     def update(self):
