@@ -12,7 +12,8 @@ valorAnterior = -1
 # Argument specifies decimal precision for __str__
 # e.g 2 digits = 1.00, 3 digits = 1.000
 # Optional, defaults to 2
-stopwatch = Stopwatch(2)  # Start a stopwatch
+stopwatch = Stopwatch(2)
+stopwatch.reset()
 # It's just math with time.perf_counter() so there isn't really a task
 # running in background
 
@@ -27,8 +28,8 @@ while True:
     LDRvalue = arduino.readline()[:-2].decode()
     # esse text para concatenar tem q ser quando ainda era string, ou seja, antes dos aux, for e etc
     # label_ldr.config(text='Valor do LDR:' + LDRvalue)
-    print("Valor Novo:" + " " + LDRvalue
-          + " " "Valor Antigo:" + " " + str(valorAnterior) + " " + "Seconds: " + str(segundos) + " " + "Running: " + str(running) + " " + "Espera: " + str(espera) + " " + "Conta_Voltas: " + str(conta_voltas))
+    # print("Valor Novo:" + " " + LDRvalue
+    #       + " " "Valor Antigo:" + " " + str(valorAnterior) + " " + "Seconds: " + str(segundos) + " " + "Running: " + str(running) + " " + "Espera: " + str(espera) + " " + "Conta_Voltas: " + str(conta_voltas))
     aux = LDRvalue.split()
     for i in aux:
         LDRvalue = int(i)
@@ -36,9 +37,11 @@ while True:
         if(segundos == 0 and millis == 0 and espera > 5):
             stopwatch.start()
             running = True
+            # print("entrei no if 1")
         else:
             if(espera > 200):
                 stopwatch.restart()
+                espera = 0
 
     if running:
         totalSec = stopwatch.duration
